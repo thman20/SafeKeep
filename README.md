@@ -1,6 +1,18 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SafeKeep 
 
-## Getting Started
+> **A high-end, premium digital curation and newsletter triage application.**
+
+SafeKeep is an elegant, highly interactive web application designed to help users quickly and beautifully triage their email newsletters. Built with **Next.js 15**, **React**, and **Framer Motion**, it focuses on a premium "Vault Archive" design aesthetic, utilizing complex motion-driven interactions to make inbox zero feel satisfying and effortless.
+
+## ✨ Features
+
+- **Fluid Motion Architecture:** Comprehensive micro-interactions, optimistic UI updates, and smooth physics-based animations via Framer Motion.
+- **Robust State Machine:** All interactions (e.g., Unsubscribe, Bulk Actions) are powered by a custom asynchronous state machine hook (`useCTAStateMachine`), seamlessly handling idle, loading, success, and error paths.
+- **Premium Aesthetics:** Follows a strict "Vault Archive" design system with a refined monochrome palette, "Ghost Border" components, and sleek glassmorphism.
+- **Optimistic UI:** Lightning-fast triage with zero-latency perceived actions; the app silently handles network requests in the background and rolls back gracefully on error.
+- **Inbox Zero:** Satisfying empty states with slow-floating micro-animations.
+
+## 🚀 Getting Started
 
 First, run the development server:
 
@@ -14,23 +26,22 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the application.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🛠 Tech Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Framework:** [Next.js](https://nextjs.org/) (App Router)
+- **Styling:** Tailwind CSS (Custom Vault Archive configurations)
+- **Animations:** [Framer Motion](https://www.framer.com/motion/)
+- **Language:** TypeScript
 
-## Learn More
+## 📂 Project Structure
 
-To learn more about Next.js, take a look at the following resources:
+- `src/app/page.tsx`: The primary Newsletter Manager and triage interface.
+- `src/app/RootClient.tsx`: The global state orchestrator handling Splash, Authentication, and Syncing phases.
+- `src/hooks/useCTAStateMachine.ts`: The core logic managing resilient, optimistic asynchronous actions.
+- `src/app/globals.css`: Contains the foundational design tokens.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📝 License
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project is licensed under the MIT License.
