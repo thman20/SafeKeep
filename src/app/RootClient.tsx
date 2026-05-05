@@ -3,16 +3,17 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Sidebar from './Sidebar';
 import Logo from './Logo';
-import LogoMark from './LogoMark';
-import LogoWordmark from './LogoWordmark';
-import SplashScreen from './SplashScreen';
 import { useCTAStateMachine } from '../hooks/useCTAStateMachine';
 
 export default function RootClient({ children }: { children: React.ReactNode }) {
   const [authState, setAuthState] = useState<'splash' | 'auth' | 'syncing' | 'authenticated'>('splash');
   const [hasAttempted, setHasAttempted] = useState(false);
 
-  // Transition is now triggered by SplashScreen onPhaseComplete
+  // Sequence: splash (1.5s) -> auth
+  useEffect(() => {
+    const t = setTimeout(() => setAuthState('auth'), 1500);
+    return () => clearTimeout(t);
+  }, []);
 
   const authCTA = useCTAStateMachine({
     action: async () => {
@@ -41,93 +42,83 @@ export default function RootClient({ children }: { children: React.ReactNode }) 
     authCTA.execute().catch(() => {});
   };
 
-  const premiumEasing: [number, number, number, number] = [0.22, 1, 0.36, 1];
+  const cubicBezier: [number, number, number, number] = [0.4, 0, 0.2, 1];
 
   if (authState !== 'authenticated' && authState !== 'syncing') {
     return (
       <div className="h-full w-full flex items-center justify-center bg-surface relative overflow-hidden">
-        <div className="flex flex-col items-center">
-          <motion.div
-            animate={authState === 'auth' ? { y: -100 } : { y: 0 }}
-            transition={{ duration: 0.8, ease: premiumEasing }}
-            className="relative flex items-center z-20"
-          >
-            {authState === 'splash' ? (
-              <SplashScreen onPhaseComplete={(p) => p === 3 && setAuthState('auth')} />
-            ) : (
-              <div className="flex items-center">
-                <div className="w-[80px]">
-                  <LogoMark className="w-full h-auto" />
-                </div>
-                <div className="-ml-6 w-[180px]">
-                  <LogoWordmark className="w-full h-auto" />
-                </div>
-              </div>
-            )}
-          </motion.div>
-
-          <AnimatePresence>
-            {authState === 'auth' && (
-              <motion.div
-                key="auth-form"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, ease: premiumEasing, delay: 0.1 }}
-                className={`w-full max-w-md p-8 bg-surface-container-lowest border border-outline-variant/20 rounded-2xl shadow-2xl absolute top-[calc(50%+40px)] z-10 flex flex-col items-center ${authCTA.isLoading ? 'opacity-80' : 'opacity-100'}`}
+        <AnimatePresence mode="wait">
+          {authState === 'splash' && (
+            <motion.div
+              key="splash"
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.6, ease: cubicBezier }}
+              className="text-center"
+            >
+              <Logo variant="dark" className="w-[200px] mx-auto" />
+            </motion.div>
+          )}
+          {authState === 'auth' && (
+            <motion.div
+              key="auth"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: cubicBezier }}
+              className={`w-full max-w-md p-8 bg-surface-container-lowest border border-outline-variant/20 rounded-2xl shadow-2xl relative z-10 transition-opacity flex flex-col items-center ${authCTA.isLoading ? 'opacity-80' : 'opacity-100'}`}
+            >
+              <Logo variant="dark" className="w-[140px] mb-8" />
+              <h2 className="text-2xl font-bold text-on-surface mb-6 w-full text-left">Welcome Back</h2>
+              <motion.form 
+                onSubmit={handleLogin} 
+                className="flex flex-col gap-4 w-full"
+                animate={authCTA.isError ? { x: [-10, 10, -10, 10, 0] } : {}}
+                transition={{ duration: 0.4 }}
               >
-                <h2 className="text-2xl font-bold text-on-surface mb-6 w-full text-left">Welcome Back</h2>
-                <motion.form 
-                  onSubmit={handleLogin} 
-                  className="flex flex-col gap-4 w-full"
-                  animate={authCTA.isError ? { x: [-10, 10, -10, 10, 0] } : {}}
-                  transition={{ duration: 0.4 }}
-                >
-                  <input 
-                    type="email" 
-                    placeholder="Email" 
-                    defaultValue="demo@safekeep.app"
-                    className={`w-full p-3 rounded-lg bg-surface-container-low border text-on-surface focus:outline-none transition-colors ${authCTA.isError ? 'border-red-500/50 focus:border-red-500' : 'border-outline-variant/30 focus:border-primary'}`}
-                    required 
-                  />
-                  <input 
-                    type="password" 
-                    placeholder="Password" 
-                    defaultValue="password"
-                    className={`w-full p-3 rounded-lg bg-surface-container-low border text-on-surface focus:outline-none transition-colors ${authCTA.isError ? 'border-red-500/50 focus:border-red-500' : 'border-outline-variant/30 focus:border-primary'}`}
-                    required 
-                  />
-                  
-                  <AnimatePresence>
-                    {authCTA.isError && (
-                      <motion.p 
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="text-red-400 text-sm m-0"
-                      >
-                        Invalid credentials. Please try again.
-                      </motion.p>
-                    )}
-                  </AnimatePresence>
+                <input 
+                  type="email" 
+                  placeholder="Email" 
+                  defaultValue="demo@safekeep.app"
+                  className={`w-full p-3 rounded-lg bg-surface-container-low border text-on-surface focus:outline-none transition-colors ${authCTA.isError ? 'border-red-500/50 focus:border-red-500' : 'border-outline-variant/30 focus:border-primary'}`}
+                  required 
+                />
+                <input 
+                  type="password" 
+                  placeholder="Password" 
+                  defaultValue="password"
+                  className={`w-full p-3 rounded-lg bg-surface-container-low border text-on-surface focus:outline-none transition-colors ${authCTA.isError ? 'border-red-500/50 focus:border-red-500' : 'border-outline-variant/30 focus:border-primary'}`}
+                  required 
+                />
+                
+                <AnimatePresence>
+                  {authCTA.isError && (
+                    <motion.p 
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="text-red-400 text-sm m-0"
+                    >
+                      Invalid credentials. Please try again.
+                    </motion.p>
+                  )}
+                </AnimatePresence>
 
-                  <button 
-                    type="submit" 
-                    disabled={authCTA.isLoading}
-                    className={`w-full p-3 rounded-lg bg-primary text-black font-semibold flex items-center justify-center transition-all mt-2 ${authCTA.isLoading ? 'opacity-80 cursor-not-allowed' : 'hover:bg-primary-dark'}`}
-                  >
-                    {authCTA.isLoading ? (
-                      <motion.div 
-                        animate={{ rotate: 360 }} 
-                        transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-                        className="w-5 h-5 border-2 border-black border-t-transparent rounded-full"
-                      />
-                    ) : 'Sign In'}
-                  </button>
-                </motion.form>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+                <button 
+                  type="submit" 
+                  disabled={authCTA.isLoading}
+                  className={`w-full p-3 rounded-lg bg-primary text-black font-semibold flex items-center justify-center transition-all mt-2 ${authCTA.isLoading ? 'opacity-80 cursor-not-allowed' : 'hover:bg-primary-dark'}`}
+                >
+                  {authCTA.isLoading ? (
+                    <motion.div 
+                      animate={{ rotate: 360 }} 
+                      transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                      className="w-5 h-5 border-2 border-black border-t-transparent rounded-full"
+                    />
+                  ) : 'Sign In'}
+                </button>
+              </motion.form>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     );
   }
@@ -243,7 +234,7 @@ export default function RootClient({ children }: { children: React.ReactNode }) 
                key="content"
                initial={{ opacity: 0 }}
                animate={{ opacity: 1 }}
-               transition={{ duration: 0.5, ease: premiumEasing }}
+               transition={{ duration: 0.5, ease: cubicBezier }}
                className="w-full h-full flex flex-col"
             >
               {children}
