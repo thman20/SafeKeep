@@ -134,37 +134,72 @@ export default function RootClient({ children }: { children: React.ReactNode }) 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0, transition: { duration: 0.3 } }}
-              className="flex-1 p-[80px] max-w-6xl mx-auto w-full"
+              className="flex-1 p-[80px] max-w-6xl mx-auto w-full relative"
             >
+              {/* Shimmer Overlay */}
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent z-20 pointer-events-none"
+                animate={{ x: ['-100%', '200%'] }}
+                transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+              />
+
               <header className="flex justify-between items-center mb-12">
-                <div className="w-64 h-10 bg-surface-container-high rounded animate-pulse" />
-                <div className="w-40 h-10 bg-surface-container-high rounded animate-pulse" />
+                <div className="w-64 h-10 bg-surface-container-low rounded-md overflow-hidden relative" />
+                <div className="w-40 h-10 bg-surface-container-low rounded-md overflow-hidden relative" />
               </header>
               <div className="flex gap-2 mb-8">
-                 <div className="w-24 h-10 bg-surface-container-high rounded animate-pulse" />
-                 <div className="w-24 h-10 bg-surface-container-high rounded animate-pulse" />
-                 <div className="w-24 h-10 bg-surface-container-high rounded animate-pulse" />
+                 {[1, 2, 3].map(i => (
+                   <div key={i} className="w-24 h-10 bg-surface-container-low rounded-[10px] overflow-hidden relative" />
+                 ))}
               </div>
-              <div className="flex flex-col gap-4">
-                {[1, 2, 3, 4].map(i => (
-                  <div key={i} className="w-full h-24 bg-surface-container-low rounded-xl animate-pulse flex items-center p-6 gap-4 border border-outline-variant/10">
-                     <div className="w-12 h-12 rounded-lg bg-surface-container-high shrink-0" />
-                     <div className="flex flex-col gap-2 flex-1">
-                        <div className="w-1/3 h-5 bg-surface-container-high rounded" />
-                        <div className="w-1/2 h-4 bg-surface-container-high rounded" />
+              <div className="flex flex-col gap-[16px]">
+                {[1, 2, 3, 4].map((item, index) => (
+                  <motion.div 
+                    key={item} 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1, duration: 0.4 }}
+                    className="w-full h-24 bg-surface-container-lowest rounded-xl flex items-center p-6 gap-4 border border-outline-variant/10 shadow-[0px_4px_24px_rgba(28,27,27,0.02)]"
+                  >
+                     <div className="w-12 h-12 rounded-lg bg-surface-container-low shrink-0" />
+                     <div className="flex flex-col gap-3 flex-1">
+                        <div className="w-1/3 h-4 bg-surface-container-low rounded" />
+                        <div className="w-1/2 h-3 bg-surface-container-low rounded" />
                      </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
               
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-4">
-                <motion.div 
-                    animate={{ rotate: 360 }} 
-                    transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
-                    className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full"
-                />
-                <p className="text-on-surface-variant font-medium tracking-wide">Analyzing Inbox...</p>
-              </div>
+              {/* Premium Loader Modal Overlay */}
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9, x: '-50%', y: '-50%' }}
+                animate={{ opacity: 1, scale: 1, x: '-50%', y: '-50%' }}
+                transition={{ delay: 0.2 }}
+                className="absolute top-1/2 left-1/2 flex flex-col items-center gap-6 bg-surface/90 backdrop-blur-md p-8 rounded-2xl shadow-2xl border border-outline-variant/20 z-30 min-w-[280px]"
+              >
+                <div className="relative flex items-center justify-center">
+                  <motion.div 
+                      animate={{ rotate: 360 }} 
+                      transition={{ repeat: Infinity, duration: 3, ease: "linear" }}
+                      className="absolute w-16 h-16 border-2 border-dashed border-primary/50 rounded-full"
+                  />
+                  <motion.div 
+                      animate={{ rotate: -360 }} 
+                      transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+                      className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full"
+                  />
+                </div>
+                <div className="flex flex-col items-center gap-1 text-center">
+                  <h3 className="text-on-surface font-bold text-lg">Analyzing Inbox</h3>
+                  <motion.p 
+                    animate={{ opacity: [0.5, 1, 0.5] }}
+                    transition={{ repeat: Infinity, duration: 1.5 }}
+                    className="text-on-surface-variant text-sm font-medium tracking-wide"
+                  >
+                    Curating digital clutter...
+                  </motion.p>
+                </div>
+              </motion.div>
 
             </motion.div>
           ) : (
