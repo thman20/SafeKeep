@@ -42,7 +42,7 @@ export default function RootClient({ children }: { children: React.ReactNode }) 
     authCTA.execute().catch(() => {});
   };
 
-  const cubicBezier = [0.4, 0, 0.2, 1];
+  const cubicBezier: [number, number, number, number] = [0.4, 0, 0.2, 1];
 
   if (authState !== 'authenticated' && authState !== 'syncing') {
     return (
@@ -177,17 +177,44 @@ export default function RootClient({ children }: { children: React.ReactNode }) 
                 transition={{ delay: 0.2 }}
                 className="absolute top-1/2 left-1/2 flex flex-col items-center gap-6 bg-surface/90 backdrop-blur-md p-8 rounded-2xl shadow-2xl border border-outline-variant/20 z-30 min-w-[280px]"
               >
-                <div className="relative flex items-center justify-center">
-                  <motion.div 
-                      animate={{ rotate: 360 }} 
-                      transition={{ repeat: Infinity, duration: 3, ease: "linear" }}
-                      className="absolute w-16 h-16 border-2 border-dashed border-primary/50 rounded-full"
-                  />
-                  <motion.div 
-                      animate={{ rotate: -360 }} 
-                      transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
-                      className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full"
-                  />
+                <div className="relative flex items-center justify-center w-24 h-24 perspective-1000" style={{ perspective: 1000 }}>
+                  {/* Back Left Cover */}
+                  <div className="absolute right-1/2 w-10 h-14 bg-surface-container-low border border-outline-variant/30 rounded-l-sm flex flex-col gap-[3px] py-2 px-1.5 items-end justify-center shadow-inner">
+                    <div className="w-full h-[2px] bg-outline-variant/20 rounded" />
+                    <div className="w-3/4 h-[2px] bg-outline-variant/20 rounded" />
+                    <div className="w-full h-[2px] bg-outline-variant/20 rounded" />
+                    <div className="w-5/6 h-[2px] bg-outline-variant/20 rounded" />
+                  </div>
+                  
+                  {/* Back Right Cover */}
+                  <div className="absolute left-1/2 w-10 h-14 bg-surface-container-low border border-outline-variant/30 rounded-r-sm flex flex-col gap-[3px] py-2 px-1.5 justify-center shadow-inner">
+                    <div className="w-full h-[2px] bg-outline-variant/20 rounded" />
+                    <div className="w-5/6 h-[2px] bg-outline-variant/20 rounded" />
+                    <div className="w-full h-[2px] bg-outline-variant/20 rounded" />
+                    <div className="w-2/3 h-[2px] bg-outline-variant/20 rounded" />
+                  </div>
+
+                  {/* Flipping Pages */}
+                  {[0, 1, 2].map((i) => (
+                    <motion.div 
+                      key={i}
+                      initial={{ rotateY: 0, zIndex: 10 - i }}
+                      animate={{ rotateY: -180, zIndex: [10 - i, 10 - i, i] }} 
+                      transition={{ 
+                        repeat: Infinity, 
+                        duration: 1.5, 
+                        ease: "easeInOut",
+                        delay: i * 0.3
+                      }}
+                      style={{ transformOrigin: "left center", transformStyle: 'preserve-3d' }}
+                      className="absolute left-1/2 w-10 h-14 bg-surface-container-highest border border-outline-variant/40 shadow-sm rounded-r-sm flex flex-col gap-[3px] py-2 px-1.5 justify-center"
+                    >
+                      <div className="w-full h-[2px] bg-outline-variant/40 rounded" />
+                      <div className="w-4/5 h-[2px] bg-outline-variant/40 rounded" />
+                      <div className="w-full h-[2px] bg-outline-variant/40 rounded" />
+                      <div className="w-1/2 h-[2px] bg-outline-variant/40 rounded" />
+                    </motion.div>
+                  ))}
                 </div>
                 <div className="flex flex-col items-center gap-1 text-center">
                   <h3 className="text-on-surface font-bold text-lg">Analyzing Inbox</h3>

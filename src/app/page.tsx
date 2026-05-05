@@ -15,7 +15,7 @@ const initialSenders = [
   { id: '7', name: 'Random Newsletter', description: 'spam@random.com', category: 'Spam', tag: 'Design', isSubscribed: true, isHighValue: false },
 ];
 
-const cubicBezier = [0.4, 0, 0.2, 1];
+const cubicBezier: [number, number, number, number] = [0.4, 0, 0.2, 1];
 
 export default function NewsletterManager() {
   const [senders, setSenders] = useState(initialSenders);
