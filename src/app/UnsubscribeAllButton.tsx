@@ -1,37 +1,43 @@
 'use client';
-import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCTAStateMachine } from '../hooks/useCTAStateMachine';
 
 export default function UnsubscribeAllButton({
   itemCount,
   onBulkUnsubscribe,
-  onToast
+  onToast,
+  onSuccessClearList
 }: {
   itemCount: number;
   onBulkUnsubscribe: () => Promise<{ success: number, failed: number }>;
   onToast: (msg: string, type?: 'success' | 'error' | 'warning') => void;
+  onSuccessClearList?: () => void;
 }) {
-  const [isConfirming, setIsConfirming] = useState(false);
-
-  const { status, execute, isError, isLoading } = useCTAStateMachine({
+  const { 
+    execute, 
+    isError, 
+    isLoading, 
+    isAwaitingConfirm, 
+    requestConfirm, 
+    cancelConfirm 
+  } = useCTAStateMachine({
     action: async () => {
-      setIsConfirming(false);
       const res = await onBulkUnsubscribe();
       if (res.failed === itemCount && itemCount > 0) {
         throw new Error("Complete failure");
       }
       return res;
     },
+    isPartialError: (res) => res.failed > 0,
     onSuccess: (res) => {
-      if (res.failed > 0) {
-        onToast(`Unsubscribed from ${res.success} senders. ${res.failed} failed. Please try again later.`, 'warning');
-      } else {
-        onToast(`Successfully unsubscribed from ${res.success} senders.`, 'success');
-      }
+      onToast(`Successfully unsubscribed from all ${res.success}.`, 'success');
+      if (onSuccessClearList) onSuccessClearList();
+    },
+    onPartialError: (res) => {
+      onToast(`Unsubscribed from ${res.success}. ${res.failed} failed.`, 'warning');
     },
     onError: () => {
-      onToast(`Network error. Could not process unsubscriptions. Please try again.`, 'error');
+      onToast(`Network error. Could not process unsubscriptions.`, 'error');
     }
   });
 
@@ -46,7 +52,7 @@ export default function UnsubscribeAllButton({
         transition={{ duration: 0.4 }}
         onClick={() => {
           if (isDisabled || isLoading) return;
-          setIsConfirming(true);
+          requestConfirm();
         }}
         disabled={isDisabled || isLoading}
         className={`flex items-center gap-2 border px-5 py-2.5 rounded-md transition-colors text-on-surface group 
@@ -72,10 +78,10 @@ export default function UnsubscribeAllButton({
 
       {/* Confirmation Popover */}
       <AnimatePresence>
-        {isConfirming && (
+        {isAwaitingConfirm && (
           <>
             {/* Invisible backdrop to dismiss popover */}
-            <div className="fixed inset-0 z-40" onClick={() => setIsConfirming(false)} />
+            <div className="fixed inset-0 z-40" onClick={() => cancelConfirm()} />
             
             <motion.div 
               initial={{ opacity: 0, y: 10, scale: 0.95 }}
@@ -90,14 +96,14 @@ export default function UnsubscribeAllButton({
               </p>
               <div className="flex justify-end gap-2">
                 <button 
-                  onClick={() => setIsConfirming(false)}
+                  onClick={() => cancelConfirm()}
                   className="px-3 py-1.5 text-xs font-semibold text-on-surface-variant hover:bg-surface-container-low rounded-md transition-colors"
                 >
                   Cancel
                 </button>
                 <button 
                   onClick={() => {
-                    execute().catch(() => {}); // execute handles the state & errors
+                    execute().catch(() => {});
                   }}
                   className="px-3 py-1.5 text-xs font-bold bg-primary text-black hover:bg-primary-dark rounded-md transition-colors"
                 >

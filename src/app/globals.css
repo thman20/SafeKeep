@@ -13,6 +13,8 @@
   --color-outline-variant: #D0C6AB;
   --color-secondary-container: #F8E290;
   --color-on-secondary-container: #74631F;
+  --color-error-base: #EF4444;
+  --color-warning-base: #F59E0B;
   --font-inter: var(--font-inter);
 }
 
